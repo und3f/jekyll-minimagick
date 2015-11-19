@@ -19,7 +19,10 @@ module Jekyll
         @name = name
         @dst_dir = preset.delete('destination')
         @src_dir = preset.delete('source')
-        @commands = preset
+        @commands = preset.delete('commands')
+        unless @commands
+            @commands  = [preset]
+        end
       end
 
       # Obtains source file path by substituting the preset's source directory
@@ -44,8 +47,10 @@ module Jekyll
 
         FileUtils.mkdir_p(File.dirname(dest_path))
         image = ::MiniMagick::Image.open(path)
-        @commands.each_pair do |command, arg|
-          image.send command, arg
+        @commands.each do |commands_list|
+            commands_list.each_pair do |command, arg|
+                image.send command, arg
+            end
         end
         image.write dest_path
 
